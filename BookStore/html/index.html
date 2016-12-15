@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>网上书城</title>
+	<link rel="stylesheet" href="../bts/bootstrap.min.css">
+	<script src='../bts/jquery.min.js'></script>
+	<script src='../bts/bootstrap.min.js'></script>
+	<script src="../bts/vue.js"></script>
+	<link rel="stylesheet" href="../css/index.css">	
+</head>
+<body>
+	<div id="nav">
+		<my-nav actived='index'></my-nav>
+	</div>
+	
+	<div class="index_body container">
+		<div class="col-xs-9">
+			<div class="left">
+				<div class="box">
+					<h1>我的书城</h1>
+					<p>这里拥有世界各地的书籍，只有你想不到，没有我们这里没有的图书</p>
+					<img src="../img/index.jpg" alt="">
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-2 col-xs-push-1">
+			<div class="right" id="index_right">
+				<div class="sign" v-if='sign'>
+					<h2>快速登录</h2>
+					<div class="sign_form">
+						<input type="text" class="form-control form-group" placeholder="用户名">
+						<input type="password" class="form-control form-group" placeholder="密码">
+						<button class="btn btn-default"  v-on:click="sign_enter">登录</button>
+						<button class="btn btn-default"  v-on:click="showChange('register')">注册</button>
+					</div>
+				</div>
+				<div class="register" v-if='register'>
+					<h2>快速注册</h2>
+					<div class="re_form">
+						<input type="text" class="form-control form-group" placeholder="用户名">
+						<input type="password" class="form-control form-group" placeholder="密码">
+						<input type="number"  class="form-control form-group" placeholder="手机号">
+						<button class="btn btn-default"  v-on:click="showChange('sign')">返回</button>
+						<button class="btn btn-default" v-on:click="reg_enter">确认</button>
+					</div>
+				</div>
+				<h2 v-if='welcome'>登录成功，<br>
+					<small>欢迎 <span style="color: red">{{users.name}},</span> <br>
+						<span v-on:click='cancel'>点击 <a href="javaScript:void(0)" style="color: red">注销</a></span>
+					</small>
+				</h2>
+
+			</div>
+		</div>	
+	</div>
+	
+	<div class="footer navbar-fixed-bottom">
+		<hr>
+		<p>
+			<a href="">免费条款</a>
+			<a href="">隐私保护</a>
+			<a href="">联系我们</a>
+			<a href="">公司简介</a>
+			<a href="">批发方案</a>
+			<a href="">配送方式</a>
+		</p>
+		<p>&copy;2016-2999 SSS版权所有，并保留所有权利</p>
+	</div>
+	
+	<script src='../temp/nav.js'></script>
+	<script>
+		
+
+		var vm = new Vue({
+			el:'#index_right',
+			data:{
+				show:'sign',
+				users:{
+					name:'',
+				}
+			},
+			computed:{
+				sign:function(){
+					if(this.show == 'sign'){
+						return true;
+					}else{
+						return false;
+					}
+				},
+				register:function(){
+					if(this.show == 'register'){
+						return true;
+					}else{
+						return false;
+					}
+				},
+				welcome:function(){
+					if(this.show == 'welcome'){
+						return true;
+					}else{
+						return false;
+					}
+				},
+			},
+			methods:{
+				showChange:function(val){
+					this.show = val;
+				},
+				sign_enter:function(){
+					var username = $('.sign_form input').eq(0).val();
+					var pwd = $('.sign_form input').eq(1).val();
+					if(!username){
+						alert('请输入用户名')
+					}else if(!pwd){
+						alert('请输入密码')
+					}else{
+						var that =this;
+						$.ajax({
+							type:'post',
+							url:'../php/login.php',
+							data:{
+								username:username,
+								pwd:pwd,
+								target:'sign',
+							},
+							success:function(data){
+								if(data=='1'){
+									that.show = 'welcome';
+									that.users.name=username;
+									setCookie('username',username,7);
+								}else{
+									alert('登录失败');
+								}
+							}
+						})
+					}
+				},
+				reg_enter:function(){
+					var username = $('.re_form input').eq(0).val();
+					var pwd = $('.re_form input').eq(1).val();
+					var tel = $('.re_form input').eq(2).val();
+					if(!username){
+						alert('请输入用户名')
+					}else if(!pwd){
+						alert('请输入密码')
+					}else if(!isPhone(tel)){
+						alert('请输入正确的手机号码')
+					}else{
+						var that =this;
+						$.ajax({
+							type:'post',
+							url:'../php/login.php',
+							// dataType:'json',
+							data:{
+								username:username,
+								pwd:pwd,
+								tel:tel,
+								target:'register',
+							},
+							success:function(data){
+								that.show = 'welcome';
+								that.users.name =username;
+								setCookie('username',username,7);
+							}
+						})
+					}	
+				},
+				cancel:function(){
+					setCookie('username','',-1);
+					this.show = 'sign';
+				}
+			}
+
+		})
+
+		$(function(){
+			//如果本地有存该用户名
+			var username = getCookie('username');
+			if(username){
+				vm.show = 'welcome';
+				vm.users.name =username;
+			}
+		})
+
+		function isPhone(tel){
+			var phone= /^((\+?[0-9]{1,4})|(\(\+86\)))?(13[0-9]|14[57]|15[012356789]|17[0678]|18[0-9])\d{8}$/;
+			if (phone.test(tel)){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		//设置cookie
+		function setCookie(c_name,value,expiredays){
+			var exdate=new Date()
+			exdate.setDate(exdate.getDate()+expiredays)
+			document.cookie=c_name+ "=" +escape(value)+((expiredays==null) ? "" : ";expires="+exdate.toGMTString())
+		}
+		//获得cookie
+		function getCookie(c_name){
+			if (document.cookie.length>0)
+			  {
+			  c_start=document.cookie.indexOf(c_name + "=")
+			  if (c_start!=-1)
+			    { 
+			    c_start=c_start + c_name.length+1 
+			    c_end=document.cookie.indexOf(";",c_start)
+			    if (c_end==-1) c_end=document.cookie.length
+			    return unescape(document.cookie.substring(c_start,c_end))
+			    } 
+			  }
+			return ""
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>网上书城</title>
+	<link rel="stylesheet" href="../bts/bootstrap.min.css">
+	<script src='../bts/jquery.min.js'></script>
+	<script src='../bts/bootstrap.min.js'></script>
+	<script src="../bts/vue.js"></script>
+	<link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+	<div id="nav">
+		<my-nav actived='book_show'></my-nav>
+	</div>
+
+	<div class="book_detail container">
+		<div class="media">
+			<div class="media-left col-xs-5">
+				<a><img v-bind:src='list.url' alt='list.book_name'></a>
+			</div>
+			<div class="media-body col-xs-7">
+				<h2>{{list.book_name}}<br><small>{{list.intro}}</small></h2>
+				<hr>
+				<div class="content">
+					<p>作者：<a href="">{{list.author}}</a></p>
+					<p>出版社：<a href="">{{list.concern}}</a></p>
+					<p>出版时间：<span>{{list.date}}</span></p>
+					<p>国际标准书号ISBN：{{list.ISBN}}</p>
+					<span>友情价格：<i>￥{{list.price}}</i></span>
+				</div>
+				<div class="_btn col-xs-10">
+					<button class="btn btn-default pull-left addto" v-on:click='shopping(list)'>加入购物车</button>
+					<button class="buy btn btn-default pull-right">立即购买</button>
+				</div>
+				<transition name="fade" v-cloak>
+				    <h1 v-show='seen'>添加成功</h1>
+				</transition>
+			</div>
+		</div>	
+	</div>
+	
+	
+	<div class="footer navbar-fixed-bottom">
+		<hr>
+		<p>
+			<a href="">免费条款</a>
+			<a href="">隐私保护</a>
+			<a href="">联系我们</a>
+			<a href="">公司简介</a>
+			<a href="">批发方案</a>
+			<a href="">配送方式</a>
+		</p>
+		<p>&copy;2016-2999 SSS版权所有，并保留所有权利</p>
+	</div>
+
+	<script src='../temp/nav.js'></script>
+	<script>
+		var vm = new Vue({
+			el:'.book_detail',
+			data:{
+				list:[],
+				seen:false,
+			},
+			methods:{
+				shopping:function(arr){
+					var that = this;
+					$.ajax({
+						type:'post',
+						url:'../php/shopping.php',
+						data:{
+							add:JSON.stringify(arr),
+						},
+						success:function(data){
+							if(data == '添加成功'){
+								that.seen=true;
+								setTimeout(function(){
+									that.seen =false;
+								},2000)
+							}
+						}
+					})
+				}
+			}
+		})
+
+		$(function(){
+			var arr =JSON.parse(sessionStorage.getItem('bookDetail'));
+			vm.list = arr;
+		})
+	</script>
+</body>
+</html>

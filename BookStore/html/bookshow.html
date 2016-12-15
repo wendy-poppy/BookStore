@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>网上书城</title>
+	<link rel="stylesheet" href="../bts/bootstrap.min.css">
+	<script src='../bts/jquery.min.js'></script>
+	<script src='../bts/bootstrap.min.js'></script>
+	<script src="../bts/vue.js"></script>
+	<link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+	<div id="nav">
+		<my-nav actived='book_show'></my-nav>
+	</div>
+
+	<div class="bookshow_body container">
+		<ul class="row list-unstyled">
+			<li class="col-xs-3" v-for="(list,index) in lists">
+				<!-- href不好拼，用本地存储代替 -->
+				<a href="detail.html" v-on:click='toDetail(index)'>
+					<img v-bind:src=list.url  alt="list.book_name">
+					<h2>{{list.book_name}}</h2>
+				</a>
+				<div class="bottom">
+					<span>￥{{list.price}}</span>
+					<button class="btn btn-success pull-right">立即购买</button>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+	<div class="container">
+		<div id='page'> <!-- 居中 -->
+			<ul class="pagination pagination-sm">
+				<li class="disabled"><a>&laquo;</a></li>
+				<li v-for= "n in count"><a>{{n}}</a></li>
+				<li><a>&raquo;</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="footer navbar-fixed-bottom">
+		<hr>
+		<p>
+			<a href="">免费条款</a>
+			<a href="">隐私保护</a>
+			<a href="">联系我们</a>
+			<a href="">公司简介</a>
+			<a href="">批发方案</a>
+			<a href="">配送方式</a>
+		</p>                        
+		<p>&copy;2016-2999 SSS版权所有，并保留所有权利</p>
+	</div>
+
+	<script src='../temp/nav.js'></script>
+	<script>
+		
+		var vm = new Vue({
+			el:'.bookshow_body',
+			data:{
+				lists:[],
+				count:1,
+			},
+			watch:{
+				count:function(){
+					var that = this;
+					$.ajax({
+						type:'get',
+						url:'../php/list.php',
+						dataType:'json',
+						data:{
+							getCount:this.count,
+						},
+						success:function(data){
+							that.lists = data;
+						}
+					})
+				}
+			},
+			methods:{
+				toDetail:function(index){
+					sessionStorage.setItem('bookDetail',JSON.stringify(this.lists[index]));
+				}
+			}
+		})
+		var cm = new Vue({
+			el:'.pagination',
+			data:{
+				count:1,
+			},
+		})
+		$.ajax({
+			type:'get',
+			url:'../php/list.php',
+			dataType:'json',
+			data:{
+				type:'first',
+			},
+			success:function(data){
+				vm.lists = data;
+			}
+		})
+
+		$.ajax({
+			type:'get',
+			url:'../php/list.php',
+			data:{
+				type:'count',
+			},
+			success:function(data){
+				cm.count = Math.ceil(Number(data)/6);
+				$('.pagination li').eq(1).attr('class','active');
+			}
+		})
+
+
+		$(function(){
+			var li = $('.pagination li:not(":first,:last")') //这个中间是,号
+			var pre = $('.pagination li:first');
+			var next = $('.pagination li:last');
+			var length = li.length;
+			// var num = 1;
+			li.click(function(){
+				vm.count=$(this).index();
+
+				pre.attr('class','');
+				next.attr('class','');
+				if($(this).index()==1){   //index还是把pre和next算进来的
+					pre.attr('class','disabled')
+				}else if($(this).index() == length){
+					next.attr('class','disabled')
+				}
+				li.attr('class','');
+				$(this).attr('class','active');
+			})
+			pre.click(function(){
+				next.attr('class','');
+				vm.count--;
+				if(vm.count<=1){
+					vm.count=1;
+					pre.attr('class','disabled')
+				}
+				li.attr('class','')
+				li.eq(vm.count-1).attr('class','active')
+			})
+			next.click(function(){
+				pre.attr('class','');
+				vm.count++;
+				if(vm.count>=length){
+					vm.count=length;
+					next.attr('class','disabled')
+				}
+				li.attr('class','')
+				li.eq(vm.count-1).attr('class','active') //li的eq不含pre和next  index包含
+			})
+		})
+	</script>
+</body>
+</html>

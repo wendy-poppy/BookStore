@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>网上书城</title>
+	<link rel="stylesheet" href="../bts/bootstrap.min.css">
+	<script src='../bts/jquery.min.js'></script>
+	<script src='../bts/bootstrap.min.js'></script>
+	<script src="../bts/vue.js"></script>
+	<link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+	<div id="nav">
+		<my-nav actived='addmore'></my-nav>
+	</div>
+	
+	<div class="container addmore">
+		<div class="row">
+			<h1 class="col-xs-9 col-xs-offset-3">添加图书</h1>
+		</div>
+		<div class="row">
+			<div class="form">
+				<label for="book_name" class="col-xs-3">书名：</label>
+				<div class="col-xs-9">
+					<input type="text" class="form-control form-group" id="book_name" placeholder="书名">
+				</div>
+				<label for="intro" class="col-xs-3">简介：</label>
+				<div class="col-xs-9">
+					<input type="text" class="form-control form-group" id="intro" placeholder="简介">
+				</div>
+				<label for="author" class="col-xs-3">作者：</label>
+				<div class="col-xs-9">
+					<input type="text" class="form-control form-group" id="author" placeholder="作者">
+				</div>
+				<label for="concern" class="col-xs-3">出版社：</label>
+				<div class="col-xs-9">
+					<input type="text" class="form-control form-group" id="concern" placeholder="出版社">
+				</div>
+				<label for="date" class="col-xs-3">出版日期：</label>
+				<div class="col-xs-9">
+					<input type="text" class="form-control form-group" id="date" placeholder="出版日期 1970-01-01">
+				</div>
+				<label for="price" class="col-xs-3">价格：</label>
+				<div class="col-xs-9">
+					<input type="text" class="form-control form-group" id="price" placeholder="价格">
+				</div>
+				<label for="ISBN" class="col-xs-3">ISBN：</label>
+				<div class="col-xs-9">
+					<input type="text" class="form-control form-group" id="ISBN" placeholder="ISBN">
+				</div>
+				<label for="book_pic" class="col-xs-3">书籍图片：</label>
+				<div class="col-xs-9">
+					<input type="file" class="form-control" id="file" placeholder="书籍图片">
+				</div>
+			</div>
+		</div>
+		<button class="btn btn-default col-xs-offset-3">添加</button>
+	</div>
+
+	<div class="footer navbar-fixed-bottom">
+		<hr>
+		<p>
+			<a href="">免费条款</a>
+			<a href="">隐私保护</a>
+			<a href="">联系我们</a>
+			<a href="">公司简介</a>
+			<a href="">批发方案</a>
+			<a href="">配送方式</a>
+		</p>
+		<p>&copy;2016-2999 SSS版权所有，并保留所有权利</p>
+	</div>
+
+	<script src='../temp/nav.js'></script>
+
+	<script>		
+		
+		
+		
+		$('button').click(function(){
+			var book_name =$('#book_name').val();
+			var intro =$('#intro').val();
+			var author =$('#author').val();
+			var concern =$('#concern').val();
+			var date =$('#date').val();
+			var price =$('#price').val();
+			var ISBN =$('#ISBN').val();
+
+			var form = new FormData();
+			var file = $('#file')[0]['files'][0]; //需要点击的时候获取
+			// console.log($('#file'))
+			
+			form.append('book_name',book_name);
+			form.append('intro',intro);
+			form.append('author',author);
+			form.append('concern',concern);
+			form.append('date',date);
+			form.append('price',price);
+			form.append('ISBN',ISBN);
+			form.append('file',file);
+			
+			$.ajax({
+				type:'post',
+				url:'../php/add.php',
+				data:form,
+				processData:false,
+				contentType:false,
+				success:function(data){
+					alert(data)
+				}
+			})
+			
+		})
+		
+
+
+	</script>
+</body>
+</html>
